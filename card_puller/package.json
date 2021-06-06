@@ -1,0 +1,10 @@
+{
+  "name": "fab-browser",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "got": "^11.8.2",
+    "rison": "^0.1.1"
+  }
+}
