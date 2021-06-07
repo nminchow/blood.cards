@@ -1,33 +1,35 @@
 <template>
-  <el-row type="flex" class="row-bg" justify="center" :gutter="10">
-    <el-col :xs="24" :sm="12" :lg="8">
-      <el-input
-        placeholder="Search For a Card"
-        v-model="search"
-        class="search"
-        clearable
-      />
-    </el-col>
-    <el-col :xs="24" :sm="6" :lg="4">
-      <el-select class="fill" filterable="true" v-model="keywords" multiple placeholder="Filter By Keyword">
-        <el-option
-          v-for="item in keywordOptions"
-          :key="item"
-          :label="item"
-          :value="item">
-        </el-option>
-      </el-select>
-    </el-col>
-  </el-row>
-  <span class="grid">
-    <div class="item" v-for="result in results" :key="result.item.identifier">
-      <img :src="result.item.image" />
-    </div>
+  <span>
+    <el-row type="flex" class="row-bg" justify="center" :gutter="10">
+      <el-col :xs="24" :sm="12" :lg="8">
+        <el-input
+          placeholder="Search For a Card"
+          v-model="search"
+          class="search"
+          clearable
+        />
+      </el-col>
+      <el-col :xs="24" :sm="6" :lg="4">
+        <el-select class="fill search" filterable="true" v-model="keywords" multiple placeholder="Filter By Keyword">
+          <el-option
+            v-for="item in keywordOptions"
+            :key="item"
+            :label="item"
+            :value="item">
+          </el-option>
+        </el-select>
+      </el-col>
+    </el-row>
+    <span class="grid">
+      <div class="item" v-for="result in results" :key="result.item.identifier">
+        <Card :url="result.item.image" />
+      </div>
+    </span>
   </span>
 </template>
 <script>
-// import cards from '../../../card_puller/minimal.json';
-import cards from '../output.json';
+import Card from './Card.vue'
+import cards from '../minimal.json';
 import { debounce, chain, intersection } from 'lodash';
 import fuse from 'fuse.js'
 
@@ -48,13 +50,13 @@ export default {
       searchFuse: null,
     }
   },
+  components: {
+    Card,
+  },
   beforeMount() {
     const getResults = (search) => {
       this.results = cardFuse.search(search).filter(({ item: { keywords } }) => {
-        console.log(this.keywords);
-        console.log(keywords);
-        console.log(intersection(this.keywords, keywords));
-        return intersection(this.keywords, keywords).length || !this.keywords;
+        return intersection(this.keywords, keywords).length || !this.keywords.length;
       });
     };
 
@@ -65,6 +67,9 @@ export default {
       if(newVal.length && newVal.length < oldVal.length) return;
       this.searchFuse(newVal);
     },
+    keywords() {
+      this.searchFuse(this.search);
+    }
   },
 }
 </script>
