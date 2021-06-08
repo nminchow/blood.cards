@@ -34,8 +34,9 @@ import { debounce, chain, intersection } from 'lodash';
 import fuse from 'fuse.js'
 
 const cardFuse = new fuse(cards, {
-  keys: ['name', 'identifier'],
+  keys: ['name', 'identifier', 'keywords'],
   threshold: 0.2,
+  useExtendedSearch: true,
 });
 
 const keywordOptions = chain(cards).map('keywords').flatten().uniq().sortBy().value().filter(Boolean);
@@ -54,9 +55,26 @@ export default {
     Card,
   },
   beforeMount() {
-    const getResults = (search) => {
-      this.results = cardFuse.search(search).filter(({ item: { keywords } }) => {
-        return intersection(this.keywords, keywords).length || !this.keywords.length;
+    const getResults = () => {
+      const { search, keywords } = this;
+
+      const filters = keywords.length ? [{
+        $or: keywords.map(keyword => ({ keywords: `=${keyword}`}))
+      }] : [];
+
+      const textMatch = search.length ? [{
+        $or: [
+          { identifier: search },
+          { name: search },
+        ],
+      }] : [];
+
+
+      this.results = cardFuse.search({
+        $and: [
+          ...filters,
+          ...textMatch,
+        ],
       });
     };
 
@@ -65,10 +83,10 @@ export default {
   watch: {
     search(newVal, oldVal) {
       if(newVal.length && newVal.length < oldVal.length) return;
-      this.searchFuse(newVal);
+      this.searchFuse();
     },
     keywords() {
-      this.searchFuse(this.search);
+      this.searchFuse();
     }
   },
 }
