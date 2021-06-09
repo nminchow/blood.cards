@@ -10,7 +10,7 @@
         />
       </el-col>
       <el-col :xs="24" :sm="6" :lg="4">
-        <el-select class="fill search" filterable="true" v-model="keywords" multiple placeholder="Filter By Keyword">
+        <el-select class="fill search" :filterable="true" v-model="keywords" multiple placeholder="Filter By Keyword">
           <el-option
             v-for="item in keywordOptions"
             :key="item"
@@ -20,11 +20,43 @@
         </el-select>
       </el-col>
     </el-row>
-    <span class="grid">
-      <div class="item" v-for="result in results" :key="result.item.identifier">
+    <el-row type="flex" class="row-bg" justify="center" :gutter="10">
+      <el-col :xs="8" :sm="6" :lg="4">
+        <el-select class="fill search" :filterable="true" v-model="cost" multiple placeholder="Filter By Cost">
+          <el-option
+            v-for="item in costOptions"
+            :key="item"
+            :label="item"
+            :value="item">
+          </el-option>
+        </el-select>
+      </el-col>
+      <el-col :xs="8" :sm="6" :lg="4">
+        <el-select class="fill search" :filterable="true" v-model="pitch" multiple placeholder="Filter By Pitch Value">
+          <el-option
+            v-for="item in [1, 2, 3]"
+            :key="item"
+            :label="item"
+            :value="item">
+          </el-option>
+        </el-select>
+      </el-col>
+      <el-col :xs="8" :sm="6" :lg="4">
+        <el-select class="fill search" filterable="true" v-model="defense" multiple placeholder="Filter By Defense">
+          <el-option
+            v-for="item in defenseOptions"
+            :key="item"
+            :label="item"
+            :value="item">
+          </el-option>
+        </el-select>
+      </el-col>
+    </el-row>
+    <ul class="grid" v-infinite-scroll="load">
+      <div class="item" v-for="result in displayedResults" :key="result.item.identifier">
         <Card :url="result.item.image" />
       </div>
-    </span>
+    </ul>
   </span>
 </template>
 <script>
@@ -34,20 +66,31 @@ import { debounce, chain, intersection } from 'lodash';
 import fuse from 'fuse.js'
 
 const cardFuse = new fuse(cards, {
-  keys: ['name', 'identifier', 'keywords'],
+  keys: ['name', 'identifier', 'keywords', 'stats.cost', 'stats.resource', 'stats.defense'],
   threshold: 0.2,
   useExtendedSearch: true,
 });
 
+const toUpperString = (x) => x.toString().toUpperCase();
+
 const keywordOptions = chain(cards).map('keywords').flatten().uniq().sortBy().value().filter(Boolean);
+const costOptions = chain(cards).map('stats.cost').compact().map(toUpperString).uniq().value().sort();
+const defenseOptions = chain(cards).map('stats.defense').compact().map(toUpperString).uniq().value().sort();
 
 export default {
   data() {
     return {
       search: '',
       keywords: [],
+      pitch: [],
+      cost: [],
+      defense: [],
       keywordOptions,
+      costOptions,
+      defenseOptions,
+      displayed: 15,
       results: [],
+      displayedResults: [],
       searchFuse: null,
     }
   },
@@ -56,7 +99,7 @@ export default {
   },
   beforeMount() {
     const getResults = () => {
-      const { search, keywords } = this;
+      const { search, keywords, cost, defense, pitch } = this;
 
       const filters = keywords.length ? [{
         $or: keywords.map(keyword => ({ keywords: `=${keyword}`}))
@@ -69,13 +112,31 @@ export default {
         ],
       }] : [];
 
+      const costMatch = cost.length ? [{
+        $or: cost.map(cost => ({ 'stats.cost': `=${cost}`}))
+      }] : [];
+
+      const pitchMatch = pitch.length ? [{
+        $or: pitch.map(pitch => ({ 'stats.resource': `=${pitch}`}))
+      }] : [];
+
+      const defenseMatch = defense.length ? [{
+        $or: defense.map(defense => ({ 'stats.defense': `=${defense}`}))
+      }] : [];
+
 
       this.results = cardFuse.search({
         $and: [
           ...filters,
+          ...costMatch,
           ...textMatch,
+          ...pitchMatch,
+          ...defenseMatch,
         ],
       });
+
+      this.displayed = 0;
+      this.displayedResults = this.results.slice(0, 15);
     };
 
     this.searchFuse = debounce(getResults, 500);
@@ -87,8 +148,24 @@ export default {
     },
     keywords() {
       this.searchFuse();
+    },
+    cost() {
+      this.searchFuse();
+    },
+    pitch() {
+      this.searchFuse();
+    },
+    defense() {
+      this.searchFuse();
     }
   },
+  methods: {
+    load () {
+      this.displayed += 15;
+      console.log('grabbing', this.displayed, this.displayed + 15);
+      this.displayedResults.push(...this.results.slice(this.displayed, this.displayed + 15));
+    }
+  }
 }
 </script>
 <style>
