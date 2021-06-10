@@ -18,9 +18,12 @@ const getCards = async () => {
 
 const saveFile = (cards) => {
   // TODO: only put in 0 cost if action
-  const minimal = cards.map(({ identifier, name, keywords, rarity, banned, image, printings: [ { sku: { sku } } ], stats: { cost = 0, ...stats } }) => (
-    { identifier, name, keywords, rarity, banned, image, sku, stats: { ...stats, cost } }
-  ));
+  const minimal = cards.map(({ identifier, name, keywords, rarity, banned, image, printings: [ { sku: { sku } } ], stats }) => {
+    if (!stats.cost && keywords.some(k => k.includes(['action', 'instant']))) {
+      stats.cost = 0;
+    }
+    return { identifier, name, keywords, rarity, banned, image, sku, stats };
+  });
   fs.writeFile('./minimal.json', JSON.stringify(minimal), () => console.log('done'));
   fs.writeFile('./output.json', JSON.stringify(cards), () => console.log('done'));
 }

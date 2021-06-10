@@ -1,14 +1,10 @@
 <template>
-  <img class="top-logo" alt="Vue logo" src="./assets/logo.png" />
-  <CardSearch/>
+  <span>
+    <img class="top-logo" alt="Vue logo" src="./assets/blood.png" />
+    <div class= "subtext">A Flesh and Blood Card Browser</div>
+    <router-view></router-view>
+  </span>
 </template>
-
-<script setup>
-import CardSearch from './components/CardSearch.vue'
-
-// This starter template is using Vue 3 experimental <script setup> SFCs
-// Check out https://github.com/vuejs/rfcs/blob/script-setup-2/active-rfcs/0000-script-setup.md
-</script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Mate+SC&family=Mate:ital@0;1&display=swap');
@@ -22,10 +18,16 @@ import CardSearch from './components/CardSearch.vue'
   text-align: center;
   color: #2c3e50;
 }
+body {
+  background-color: #e9e5d81f;
+}
+.subtext {
+  margin-bottom: 1.3rem;
+}
 .top-logo {
-  max-height: 12rem;
+  max-height: 4rem;
   max-width: 90%;
   height: auto;
-  margin-bottom: 1.5rem;
+  margin-bottom: .3rem;
 }
 </style>
