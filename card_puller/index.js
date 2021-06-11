@@ -17,7 +17,6 @@ const getCards = async () => {
 };
 
 const saveFile = (cards) => {
-  // TODO: only put in 0 cost if action
   const minimal = cards.map(({ identifier, name, keywords, rarity, banned, image, printings: [ { sku: { sku } } ], stats }) => {
     if (!stats.cost && keywords.some(k => k.includes(['action', 'instant']))) {
       stats.cost = 0;
