@@ -44,6 +44,7 @@ a {
   margin-bottom: .3rem;
 }
 .link {
+  display: none;
   position: absolute;
   top: 1rem;
 }
