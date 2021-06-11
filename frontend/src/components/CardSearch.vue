@@ -2,12 +2,16 @@
   <span>
     <el-row type="flex" class="row-bg" justify="center" :gutter="10">
       <el-col :xs="24" :sm="12" :lg="8">
-        <el-input
-          placeholder="Search For a Card"
-          v-model="search"
-          class="search"
-          clearable
-        />
+        <!-- hacks to properly bind to input event for mobile -->
+        <div class="el-input el-input--suffix search">
+          <input
+            class="el-input__inner"
+            placeholder="Search For a Card"
+            v-model="search"
+            @input="(x) => search = x.target.value"
+            clearable
+          />
+        </div>
       </el-col>
       <el-col :xs="24" :sm="6" :lg="4">
         <el-select class="fill search" :filterable="true" v-model="keywords" multiple placeholder="Keyword">
