@@ -10,7 +10,7 @@
         />
       </el-col>
       <el-col :xs="24" :sm="6" :lg="4">
-        <el-select class="fill search" :filterable="true" v-model="keywords" multiple placeholder="Filter By Keyword">
+        <el-select class="fill search" :filterable="true" v-model="keywords" multiple placeholder="Keyword">
           <el-option
             v-for="item in keywordOptions"
             :key="item"
@@ -22,7 +22,7 @@
     </el-row>
     <el-row type="flex" class="row-bg" justify="center" :gutter="10">
       <el-col :xs="8" :sm="6" :lg="4">
-        <el-select class="fill search" :filterable="true" v-model="cost" multiple placeholder="Filter By Cost">
+        <el-select class="fill search" :filterable="true" v-model="cost" multiple placeholder="Cost">
           <el-option
             v-for="item in costOptions"
             :key="item"
@@ -32,7 +32,7 @@
         </el-select>
       </el-col>
       <el-col :xs="8" :sm="6" :lg="4">
-        <el-select class="fill search" :filterable="true" v-model="pitch" multiple placeholder="Filter By Pitch Value">
+        <el-select class="fill search" :filterable="true" v-model="pitch" multiple placeholder="Pitch Value">
           <el-option
             v-for="item in [1, 2, 3]"
             :key="item"
@@ -42,7 +42,7 @@
         </el-select>
       </el-col>
       <el-col :xs="8" :sm="6" :lg="4">
-        <el-select class="fill search" :filterable="true" v-model="defense" multiple placeholder="Filter By Defense">
+        <el-select class="fill search" :filterable="true" v-model="defense" multiple placeholder="Defense">
           <el-option
             v-for="item in defenseOptions"
             :key="item"
@@ -189,6 +189,7 @@ export default {
   justify-content: center;
   flex-wrap: wrap;
   margin: -0.5rem;
+  padding: 0rem;
 }
 .item {
   margin: 0.5rem;
