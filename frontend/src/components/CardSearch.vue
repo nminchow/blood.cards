@@ -42,7 +42,7 @@
         </el-select>
       </el-col>
       <el-col :xs="8" :sm="6" :lg="4">
-        <el-select class="fill search" filterable="true" v-model="defense" multiple placeholder="Filter By Defense">
+        <el-select class="fill search" :filterable="true" v-model="defense" multiple placeholder="Filter By Defense">
           <el-option
             v-for="item in defenseOptions"
             :key="item"
@@ -62,7 +62,7 @@
 <script>
 import Card from './Card.vue'
 import cards from '../minimal.json';
-import { debounce, chain, intersection } from 'lodash';
+import { debounce, chain, throttle } from 'lodash';
 import fuse from 'fuse.js'
 
 const cardFuse = new fuse(cards, {
@@ -92,6 +92,7 @@ export default {
       results: [],
       displayedResults: [],
       searchFuse: null,
+      loadMore: null,
     }
   },
   components: {
@@ -140,6 +141,15 @@ export default {
     };
 
     this.searchFuse = debounce(getResults, 500);
+
+    const loadMore = () => {
+      this.displayed += 15;
+      console.log('grabbing', this.displayed, this.displayed + 15);
+      this.displayedResults.push(...this.results.slice(this.displayed, this.displayed + 15));
+    }
+
+    // throttle to prevent a bunch of loads triggering when first set up
+    this.loadMore = throttle(loadMore, 200);
   },
   watch: {
     search(newVal, oldVal) {
@@ -161,9 +171,7 @@ export default {
   },
   methods: {
     load () {
-      this.displayed += 15;
-      console.log('grabbing', this.displayed, this.displayed + 15);
-      this.displayedResults.push(...this.results.slice(this.displayed, this.displayed + 15));
+      this.loadMore();
     }
   }
 }
