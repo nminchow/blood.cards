@@ -25,14 +25,18 @@
         <el-input placeholder="Filter" v-model="optionFilter" class="input-with-select">
           <template #prepend>
             <el-select style="width:8rem" v-model="optionTypeFilter" placeholder="Select">
-              <el-option label="Restaurant" value="1"></el-option>
-              <el-option label="Order No." value="2"></el-option>
-              <el-option label="Tel" value="3"></el-option>
+              <el-option
+                v-for="filter in Object.keys(cardFilters)"
+                :key="filter"
+                :label="filter"
+                :value="filter"
+              />
             </el-select>
           </template>
         </el-input>
+        {{optionFilter}}
         <ul>
-          <li v-for="card in validCards" :key="card.identifier">
+          <li v-for="card in validCards" :key="card.identifier" class="search-item">
             {{card.name}}
           </li>
         </ul>
@@ -44,12 +48,43 @@
 </template>
 <script>
 import rison from 'rison';
-import { keyBy, chain, sortBy } from 'lodash';
+import { keyBy, chain } from 'lodash';
 import cards from '../minimal.json';
+import fuse from 'fuse.js'
 
 const cardObj = keyBy(cards, 'identifier');
 
 const heroOptions = chain(cards).filter(({ keywords }) => keywords.includes('hero')).sortBy('name').value();
+
+const cardFilters = {
+  All: {
+    filter: () => true,
+  },
+  Weapons: {
+    filter: ({ keywords }) => keywords.includes('weapon')
+  },
+  Equipment: {
+    filter: ({ keywords }) => keywords.includes('equipment')
+  },
+  Instants: {
+    filter: ({ keywords }) => keywords.includes('instant')
+  },
+  Items: {
+    filter: ({ keywords }) => keywords.includes('item')
+  },
+  ["Non-Attack Actions"]: {
+    filter: ({ keywords }) => keywords.includes('action') && !keywords.includes('attack')
+  },
+  ['Attack Actions']: {
+    filter: ({ keywords }) => keywords.includes('attack')
+  },
+  ['Attack Reactions']: {
+    filter: ({ keywords }) => keywords.includes('attack') && keywords.includes('reaction')
+  },
+  ['Defense Reactions']: {
+    filter: ({ keywords }) => keywords.includes('defense') && keywords.includes('reaction')
+  },
+}
 
 export default {
   data() {
@@ -59,8 +94,9 @@ export default {
       name: null,
       description: null,
       heroOptions,
-      optionFilter: null,
-      optionTypeFilter: null,
+      optionFilter: 'eye',
+      cardFilters,
+      optionTypeFilter: 'All',
     }
   },
   computed: {
@@ -73,15 +109,29 @@ export default {
       }
     },
     validCards: function() {
+      // TODO optionFilter should probably be the output of debouncing an "option filter raw" to make input more smooth
       if( !this.hero ) return [];
       const { keywords } = cardObj[this.hero];
       const invalid = ['', 'hero', 'young']
       const validKeywords = keywords.filter(k => !invalid.includes(k));
       console.log(validKeywords);
-      return cards.filter(({ keywords, banned }) => {
+      const pool = cards.filter(({ keywords, banned }) => {
         if (banned) return false;
-        return !keywords.includes('hero') && keywords.find(k => validKeywords.includes(k));
+        return !keywords.includes('hero') && keywords.find(k => [...validKeywords, 'generic'].includes(k));
+      }).filter(cardFilters[this.optionTypeFilter].filter);
+
+      if (!this.optionFilter) return pool;
+
+      const cardFuse = new fuse(pool, {
+        keys: ['name'],
+        threshold: 0.2
       });
+
+      const result = cardFuse.search(this.optionFilter).map(({ item }) => item);
+
+      console.log(result);
+
+      return result;
     }
   },
   watch: {
@@ -104,3 +154,8 @@ export default {
   }
 }
 </script>
+<style>
+.search-item {
+  text-align: left;
+}
+</style>
