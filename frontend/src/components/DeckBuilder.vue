@@ -35,9 +35,9 @@
           </template>
         </el-input>
         {{optionFilter}}
-        <ul>
+        <ul class="cards">
           <li v-for="card in validCards" :key="card.identifier" class="search-item">
-            {{card.name}}
+            <CardName :card="card" />
           </li>
         </ul>
       </el-col>
@@ -51,6 +51,7 @@ import rison from 'rison';
 import { keyBy, chain } from 'lodash';
 import cards from '../minimal.json';
 import fuse from 'fuse.js'
+import CardName from './CardName.vue'
 
 const cardObj = keyBy(cards, 'identifier');
 
@@ -151,11 +152,19 @@ export default {
     // this.deck = rison.decode(this.$route.params.data || '()');
     // console.log(this.$route.params.data);
     console.log(this.deck);
+  },
+  components: {
+    CardName,
   }
 }
 </script>
 <style>
 .search-item {
   text-align: left;
+}
+.cards {
+  list-style-type:none;
+  margin-left: 0;
+  padding-left: 0;
 }
 </style>

@@ -58,13 +58,13 @@
     </el-row>
     <ul class="grid" v-infinite-scroll="load">
       <div class="item" v-for="result in displayedResults" :key="result.item.identifier">
-        <Card :url="result.item.image" />
+        <CardImage :url="result.item.image" />
       </div>
     </ul>
   </span>
 </template>
 <script>
-import Card from './Card.vue'
+import CardImage from './CardImage.vue'
 import cards from '../minimal.json';
 import { debounce, chain, throttle } from 'lodash';
 import fuse from 'fuse.js'
@@ -100,7 +100,7 @@ export default {
     }
   },
   components: {
-    Card,
+    CardImage,
   },
   beforeMount() {
     const getResults = () => {
