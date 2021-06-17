@@ -19,6 +19,30 @@
     <el-row type="flex" class="row-bg" justify="center" :gutter="10">
       <el-col :xs="24" :sm="14">
         Deck
+        <div>
+          <el-row type="flex" class="row-bg" justify="space-around">
+            <el-col :xs="12" :sm="6" :lg="4">
+              <div v-if="hero">
+                <img class="hero-image" :src="getCard(hero).image">
+              </div>
+            </el-col>
+            <el-col :xs="12" :sm="6" :lg="4">
+              <div v-if="hero">
+                Curve here
+              </div>
+            </el-col>
+          </el-row>
+          <ul class="cards">
+            <li v-for="card in Object.entries(this.deck.cards).map(([id, count]) => getCard(id))" :key="card.identifier" class="search-item">
+              <CardName
+                @add-clicked="add(card.identifier)"
+                :count="cards[card.identifier]"
+                :card="card"
+                placement="right"
+              />
+            </li>
+          </ul>
+        </div>
       </el-col>
       <el-col :xs="24" :sm="8">
         <div>Add Cards</div>
@@ -37,12 +61,16 @@
         {{optionFilter}}
         <ul class="cards">
           <li v-for="card in validCards" :key="card.identifier" class="search-item">
-            <CardName :card="card" />
+            <CardName
+              @add-clicked="add(card.identifier)"
+              :count="cards[card.identifier]"
+              :card="card"
+              placement="left"
+            />
           </li>
         </ul>
       </el-col>
     </el-row>
-    {{this.deck}}
     <br/>
   </span>
 </template>
@@ -90,7 +118,7 @@ const cardFilters = {
 export default {
   data() {
     return {
-      cards: [],
+      cards: {},
       hero: null,
       name: null,
       description: null,
@@ -136,6 +164,7 @@ export default {
     }
   },
   watch: {
+    // TODO: create debounced function that purges 0-d cards after some time (5 seconds or so)
     deck (data) {
       const query = {...this.$route.query, data: rison.encode(data)};
       this.$router.replace({ path: '/deck', query });
@@ -152,14 +181,28 @@ export default {
     // console.log(this.$route.params.data);
     console.log(this.deck);
   },
+  methods: {
+    add(identifier) {
+      console.log('adding');
+      const count = this.cards[identifier] || 0;
+      const setValue = () => {
+        if (count >= 3) return 0;
+        return count + 1;
+      };
+      this.cards[identifier] = setValue();
+    },
+    getCard(identifier) {
+      return cardObj[identifier];
+    }
+  },
   components: {
     CardName,
   }
 }
 </script>
 <style>
-.search-item {
-  text-align: left;
+.hero-image {
+  height: 200px;
 }
 .cards {
   list-style-type:none;

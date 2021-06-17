@@ -1,16 +1,16 @@
 <template>
   <el-popover
-    placement="left"
+    :placement="placement"
     trigger="hover"
     :show-arrow="false"
-    :show-after="500"
+    :show-after="800"
     :width="300"
     popper-class="popper-class"
   >
     <CardImage :show="showImage" :url="card.image" />
     <template #reference>
-      <el-badge @mouseover="setShow" :value="count" :class="`badge-${color}`">
-        <el-button size="mini" :class="`card-button ${color}`">{{card.name}}</el-button>
+      <el-badge @mouseover="setShow" :value="count || 0" :class="`badge-${color}`">
+        <el-button @click="$emit('add-clicked')" size="mini" :class="`card-button ${color}`">{{card.name}}</el-button>
       </el-badge>
     </template>
   </el-popover>
@@ -22,10 +22,12 @@ import CardImage from './CardImage.vue'
 export default {
   props: {
     card: Object,
+    count: Number,
+    placement: String,
   },
-  setup(props) {
+  emits: ['add-clicked'],
+  setup() {
     return {
-      count: props.count || 0,
       showImage: false,
     }
   },
@@ -40,7 +42,6 @@ export default {
   },
   methods: {
     setShow () {
-      console.log('setting');
       this.showImage = true;
     },
   },
@@ -83,7 +84,7 @@ export default {
 } */
 .card-button {
   margin-bottom: .8rem !important;
-  width: 13rem;
+  width: 17rem;
   text-align: left !important;
 }
 </style>
