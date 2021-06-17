@@ -10,7 +10,16 @@
     <CardImage :show="showImage" :url="card.image" />
     <template #reference>
       <el-badge @mouseover="setShow" :value="count || 0" :class="`badge-${color}`">
-        <el-button @click="$emit('add-clicked')" size="mini" :class="`card-button ${color}`">{{card.name}}</el-button>
+        <el-button @click="$emit('add-clicked')" :class="`card-button ${color}`">
+          <div class="button-content">
+            <div>
+              {{card.name}}
+            </div>
+            <div class="img-wrapper">
+              <img class="inline-img" :src="card.image"/>
+            </div>
+          </div>
+        </el-button>
       </el-badge>
     </template>
   </el-popover>
@@ -51,6 +60,21 @@ export default {
 }
 </script>
 <style>
+.button-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.img-wrapper {
+  overflow: hidden;
+}
+.inline-img {
+  object-fit: cover;
+  width: 52px;
+  height: 40px;
+  object-position: 50% 18%;
+  transform: scale(1.2);
+}
 .red {
   color: #A70005 !important;
 }
@@ -86,5 +110,7 @@ export default {
   margin-bottom: .8rem !important;
   width: 17rem;
   text-align: left !important;
+  padding: .1rem !important;
+  padding-left: .5rem !important;
 }
 </style>

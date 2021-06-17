@@ -75,8 +75,9 @@
   </span>
 </template>
 <script>
+import { reactive } from 'vue'
 import rison from 'rison';
-import { keyBy, chain } from 'lodash';
+import { keyBy, chain, debounce } from 'lodash';
 import cards from '../minimal.json';
 import fuse from 'fuse.js'
 import CardName from './CardName.vue'
@@ -118,7 +119,7 @@ const cardFilters = {
 export default {
   data() {
     return {
-      cards: {},
+      cards: reactive({}),
       hero: null,
       name: null,
       description: null,
@@ -126,10 +127,21 @@ export default {
       optionFilter: '',
       cardFilters,
       optionTypeFilter: 'All',
+      purgeCards: null,
     }
   },
+  beforeMount() {
+    const purgeCards = () => {
+      Object.entries(this.cards).filter(([, value]) => !value).map(([k]) => {
+        delete this.cards[k];
+      });
+    };
+    this.purgeCards = debounce(purgeCards, 5000);
+  },
   computed: {
+    // this isn't firing when cards changes (because its an object). Proxy cards with a deep watcher? Switch to composition api?
     deck: function() {
+      console.log('in deck compute');
       return {
         hero: this.hero,
         cards: this.cards,
@@ -168,6 +180,7 @@ export default {
     deck (data) {
       const query = {...this.$route.query, data: rison.encode(data)};
       this.$router.replace({ path: '/deck', query });
+      this.purgeCards();
     }
   },
   mounted() {
