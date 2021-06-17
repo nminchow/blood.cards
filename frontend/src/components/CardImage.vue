@@ -1,6 +1,6 @@
 <template>
   <transition name="el-zoom-in-center">
-    <img v-show="loaded" :src="url" @load="onLoad" />
+    <img v-if="show" v-show="loaded" :src="url" @load="onLoad" />
   </transition>
 </template>
 
@@ -9,6 +9,7 @@
 export default {
   props: {
     url: String,
+    show: Boolean
   },
   data() {
     return {
@@ -19,6 +20,6 @@ export default {
     onLoad() {
       this.loaded = true;
     }
-  }
+  },
 }
 </script>

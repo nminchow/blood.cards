@@ -1,17 +1,32 @@
 <template>
-  <el-badge :value="count" :class="`badge-${color}`">
-    <el-button size="mini" :class="`card-button ${color}`">{{card.name}}</el-button>
-  </el-badge>
+  <el-popover
+    placement="left"
+    trigger="hover"
+    :show-arrow="false"
+    :show-after="500"
+    :width="300"
+    popper-class="popper-class"
+  >
+    <CardImage :show="showImage" :url="card.image" />
+    <template #reference>
+      <el-badge @mouseover="setShow" :value="count" :class="`badge-${color}`">
+        <el-button size="mini" :class="`card-button ${color}`">{{card.name}}</el-button>
+      </el-badge>
+    </template>
+  </el-popover>
 </template>
 <script>
+import CardImage from './CardImage.vue'
+
+
 export default {
   props: {
     card: Object,
   },
   setup(props) {
     return {
-      card: props.card,
       count: props.count || 0,
+      showImage: false,
     }
   },
   computed: {
@@ -22,6 +37,15 @@ export default {
       if (resource == 3) return 'blue';
       return '';
     }
+  },
+  methods: {
+    setShow () {
+      console.log('setting');
+      this.showImage = true;
+    },
+  },
+  components: {
+    CardImage,
   }
 }
 </script>
@@ -47,6 +71,16 @@ export default {
 .badge-yellow sup {
   background-color: #E3B800 !important;
 }
+/* .el-popper.el-popover { */
+.popper-class {
+  background: none !important;
+  color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+/* .el-popover .el-popper__arrow {
+  display: none !important;
+} */
 .card-button {
   margin-bottom: .8rem !important;
   width: 13rem;

@@ -95,7 +95,7 @@ export default {
       name: null,
       description: null,
       heroOptions,
-      optionFilter: 'eye',
+      optionFilter: '',
       cardFilters,
       optionTypeFilter: 'All',
     }
@@ -137,7 +137,6 @@ export default {
   },
   watch: {
     deck (data) {
-      console.log(data);
       const query = {...this.$route.query, data: rison.encode(data)};
       this.$router.replace({ path: '/deck', query });
     }

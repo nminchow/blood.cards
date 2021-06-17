@@ -58,7 +58,7 @@
     </el-row>
     <ul class="grid" v-infinite-scroll="load">
       <div class="item" v-for="result in displayedResults" :key="result.item.identifier">
-        <CardImage :url="result.item.image" />
+        <CardImage :show="true" :url="result.item.image" />
       </div>
     </ul>
   </span>
