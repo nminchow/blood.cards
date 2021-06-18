@@ -7,7 +7,7 @@
     :width="300"
     popper-class="popper-class"
   >
-    <CardImage :show="showImage" :url="card.image" />
+    <CardImage :transition="false" :show="showImage" :url="card.image" />
     <template #reference>
       <el-badge @mouseover="setShow" :value="count || 0" :class="`badge-${color}`">
         <el-button @click="$emit('add-clicked')" :class="`card-button ${color}`">
