@@ -1,5 +1,6 @@
 <template>
   <span>
+    <h3 class="curve-label">Resource Curve:</h3>
     <div class="curve-container">
       <label class="resource-label curve" for='red-bar'>Red</label>
       <meter
@@ -48,10 +49,26 @@
         {{blue}}
       </div>
     </div>
+    <h3 id="cost-label" class="curve-label">Cost:</h3>
+    <div class="cost-curve">
+      <div v-for="cost in byCost" :key="cost.key" class="curve-container">
+        <label class="resource-label curve" :for='cost.key'>{{cost.key}}</label>
+        <meter
+          class="curve"
+          :id='cost.key'
+          min="0"
+          :max="maxCost"
+          :value="cost.value"
+        />
+        <div class="curve">
+          {{cost.value}}
+        </div>
+      </div>
+    </div>
   </span>
 </template>
 <script>
-import { keyBy, groupBy } from 'lodash';
+import { keyBy, groupBy, sortBy } from 'lodash';
 import cards from '../minimal.json';
 import { computed, toRefs } from 'vue';
 const cardObj = keyBy(cards, 'identifier');
@@ -64,11 +81,26 @@ export default {
     const { cards } = toRefs(props);
 
     const byResource = computed(() => {
-      const result = groupBy(Object.entries(cards.value), ([k]) => {
+      return groupBy(Object.entries(cards.value), ([k]) => {
         return cardObj[k].stats.resource;
       });
-      console.log(result);
-      return result;
+    });
+
+    const byCost = computed(() => {
+      const grouped = groupBy(Object.entries(cards.value), ([k]) => {
+        return cardObj[k].stats.cost || 'other';
+      });
+
+      return sortBy(
+        Object.entries(grouped).map(([key, v]) => ({ key, value: v.reduce(
+          (acc, [,v]) => acc+v,
+          0
+        ) })),
+      'key')
+    });
+
+    const maxCost = computed(() => {
+      return Math.max(...byCost.value.map(({ value }) => value));
     });
 
     const computeSumByResource = (key) => () => (byResource.value[key] || []).reduce((total,[, v]) => v + total, 0);
@@ -85,6 +117,8 @@ export default {
       blue,
       maxResource,
       byResource,
+      byCost,
+      maxCost
     };
   },
 }
@@ -101,10 +135,16 @@ meter {
   flex: 1;
   display: flex;
 }
-/* .curve:first-child > span { margin-right: auto; } */
-
-/* .curve:last-child  > span { margin-left: auto;  } */
 .curve-container {
   display: flex;
+}
+h3 {
+  margin-bottom: .4rem;
+}
+.curve-label {
+  margin: 0;
+}
+#cost-label {
+  margin-top: 2rem;
 }
 </style>

@@ -18,7 +18,7 @@
     </el-row>
     <el-row type="flex" class="row-bg" justify="center" :gutter="10">
       <el-col :xs="24" :sm="14">
-        Deck
+        <h2>Deck</h2>
         <div>
           <el-row type="flex" class="row-bg" justify="space-around">
             <el-col :xs="12" :sm="12" :lg="12">
@@ -45,7 +45,7 @@
         </div>
       </el-col>
       <el-col :xs="24" :sm="8">
-        <div>Add Cards</div>
+        <h2>Add Cards</h2>
         <el-input placeholder="Filter" v-model="optionFilter" class="input-with-select">
           <template #prepend>
             <el-select style="width:8rem" v-model="optionTypeFilter" placeholder="Select">
@@ -58,7 +58,6 @@
             </el-select>
           </template>
         </el-input>
-        {{optionFilter}}
         <ul class="cards">
           <li v-for="card in validCards" :key="card.identifier" class="search-item">
             <CardName
