@@ -16,7 +16,7 @@
               {{card.name}}
             </div>
             <div class="img-wrapper">
-              <img class="inline-img" :src="card.image"/>
+              <img loading="lazy" class="inline-img" :src="card.image"/>
             </div>
           </div>
         </el-button>

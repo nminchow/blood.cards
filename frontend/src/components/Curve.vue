@@ -1,7 +1,53 @@
 <template>
   <span>
-    <!-- {{byResource}} -->
-    {{red}}
+    <div class="curve-container">
+      <label class="resource-label curve" for='red-bar'>Red</label>
+      <meter
+        class="curve"
+        id='red-bar'
+        min="0"
+        :max="maxResource"
+        :value="red"
+        :low="red+1"
+        :high="red+2"
+        :optimum="red+3"
+      />
+      <div class="curve">
+        {{red}}
+      </div>
+    </div>
+    <div class="curve-container">
+      <label class="resource-label curve" for='yellow-bar'>Yellow</label>
+      <meter
+        class="curve"
+        id='yellow-bar'
+        min="0"
+        :max="maxResource"
+        :value="yellow"
+        :low="yellow-3"
+        :optimum="yellow-2"
+        :high="yellow-1"
+      />
+      <div class="curve">
+        {{yellow}}
+      </div>
+    </div>
+    <div class="curve-container">
+      <label class="resource-label curve" for='blue-bar'>Blue</label>
+      <meter
+        class="curve"
+        id='blue-bar'
+        min="0"
+        :max="maxResource"
+        :value="blue"
+        :low="blue-1"
+        :optimum="blue"
+        :high="blue+1"
+      />
+      <div class="curve">
+        {{blue}}
+      </div>
+    </div>
   </span>
 </template>
 <script>
@@ -25,19 +71,40 @@ export default {
       return result;
     });
 
-    const red = computed(() => {
-      console.log('in comp');
-      console.log(byResource);
-      console.log(byResource.value);
-      // { "1": [ [ "mordred-tide-red", 3 ], [ "spellblade-assault-red", 3 ] ] }
-      // return byResource.value
-      return byResource.value['1'].reduce((total,[, v]) => v + total, 0);
-    });
+    const computeSumByResource = (key) => () => (byResource.value[key] || []).reduce((total,[, v]) => v + total, 0);
+
+    const red = computed(computeSumByResource('1'));
+    const yellow = computed(computeSumByResource('2'));
+    const blue = computed(computeSumByResource('3'));
+
+    const maxResource = computed(() => Math.max(red.value, blue.value, yellow.value) * 1.5);
 
     return {
       red,
+      yellow,
+      blue,
+      maxResource,
       byResource,
     };
   },
 }
 </script>
+<style>
+.resource-label {
+  justify-content: right;
+}
+meter {
+  margin-left: .5rem;
+  margin-right: .5rem;
+}
+.curve {
+  flex: 1;
+  display: flex;
+}
+/* .curve:first-child > span { margin-right: auto; } */
+
+/* .curve:last-child  > span { margin-left: auto;  } */
+.curve-container {
+  display: flex;
+}
+</style>
