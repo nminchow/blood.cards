@@ -21,14 +21,14 @@
         Deck
         <div>
           <el-row type="flex" class="row-bg" justify="space-around">
-            <el-col :xs="12" :sm="6" :lg="4">
+            <el-col :xs="12" :sm="12" :lg="12">
               <div v-if="hero">
                 <img class="hero-image" :src="getCard(hero).image">
               </div>
             </el-col>
-            <el-col :xs="12" :sm="6" :lg="4">
+            <el-col :xs="12" :sm="12" :lg="12">
               <div v-if="hero">
-                Curve here
+                <Curve :cards="cards"/>
               </div>
             </el-col>
           </el-row>
@@ -75,12 +75,13 @@
   </span>
 </template>
 <script>
-import { reactive } from 'vue'
+import { reactive, ref, computed } from 'vue'
 import rison from 'rison';
 import { keyBy, chain, debounce } from 'lodash';
 import cards from '../minimal.json';
 import fuse from 'fuse.js'
 import CardName from './CardName.vue'
+import Curve from './Curve.vue'
 
 const cardObj = keyBy(cards, 'identifier');
 
@@ -117,17 +118,35 @@ const cardFilters = {
 }
 
 export default {
-  data() {
+  setup() {
+    const cards = reactive({});
+    const hero = ref();
+    const name = ref('');
+    const description = ref('');
+    const optionFilter = ref('');
+    const optionTypeFilter = ref('All');
+    const purgeCards = ref();
+
+    const deck = computed(() => {
+      return {
+        hero: hero.value,
+        cards: { ...cards },
+        name: name.value,
+        description: description.value,
+      };
+    });
+
     return {
-      cards: reactive({}),
-      hero: null,
-      name: null,
-      description: null,
+      deck,
+      cards,
+      hero,
+      name,
+      description,
       heroOptions,
-      optionFilter: '',
+      optionFilter,
       cardFilters,
-      optionTypeFilter: 'All',
-      purgeCards: null,
+      optionTypeFilter,
+      purgeCards,
     }
   },
   beforeMount() {
@@ -140,22 +159,12 @@ export default {
   },
   computed: {
     // this isn't firing when cards changes (because its an object). Proxy cards with a deep watcher? Switch to composition api?
-    deck: function() {
-      console.log('in deck compute');
-      return {
-        hero: this.hero,
-        cards: this.cards,
-        name: this.name, // only on saved?
-        description: this.description, // only on saved
-      }
-    },
     validCards: function() {
       // TODO optionFilter should probably be the output of debouncing an "option filter raw" to make input more smooth
       if( !this.hero ) return [];
       const { keywords } = cardObj[this.hero];
       const invalid = ['', 'hero', 'young']
       const validKeywords = keywords.filter(k => !invalid.includes(k));
-      console.log(validKeywords);
       const pool = cards.filter(({ keywords, banned }) => {
         if (banned) return false;
         return !keywords.includes('hero') && keywords.find(k => [...validKeywords, 'generic'].includes(k));
@@ -169,8 +178,6 @@ export default {
       });
 
       const result = cardFuse.search(this.optionFilter).map(({ item }) => item);
-
-      console.log(result);
 
       return result;
     }
@@ -188,15 +195,13 @@ export default {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const { hero, cards, name } = rison.decode(Object.fromEntries(urlSearchParams.entries()).data || '()');
     if (hero) this.hero = hero;
-    if (cards) this.cards = cards;
+    if (cards) Object.entries(cards).map(([k, v]) => this.cards[k] = v);
     if (name) this.name = name;
     // this.deck = rison.decode(this.$route.params.data || '()');
     // console.log(this.$route.params.data);
-    console.log(this.deck);
   },
   methods: {
     add(identifier) {
-      console.log('adding');
       const count = this.cards[identifier] || 0;
       const setValue = () => {
         if (count >= 3) return 0;
@@ -210,12 +215,14 @@ export default {
   },
   components: {
     CardName,
+    Curve
   }
 }
 </script>
 <style>
 .hero-image {
-  height: 200px;
+    object-fit: scale-down;
+    max-width: 100%
 }
 .cards {
   list-style-type:none;
