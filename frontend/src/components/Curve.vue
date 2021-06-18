@@ -9,9 +9,9 @@
         min="0"
         :max="maxResource"
         :value="red"
-        :low="red+1"
-        :high="red+2"
-        :optimum="red+3"
+        :low="red+.1"
+        :high="red+.2"
+        :optimum="red+.3"
       />
       <div class="curve">
         {{red}}
@@ -25,9 +25,9 @@
         min="0"
         :max="maxResource"
         :value="yellow"
-        :low="yellow-3"
-        :optimum="yellow-2"
-        :high="yellow-1"
+        :low="yellow-.3"
+        :optimum="yellow-.2"
+        :high="yellow-.1"
       />
       <div class="curve">
         {{yellow}}
@@ -41,9 +41,6 @@
         min="0"
         :max="maxResource"
         :value="blue"
-        :low="blue-1"
-        :optimum="blue"
-        :high="blue+1"
       />
       <div class="curve">
         {{blue}}
@@ -68,7 +65,7 @@
   </span>
 </template>
 <script>
-import { keyBy, groupBy, sortBy } from 'lodash';
+import { keyBy, groupBy, orderBy } from 'lodash';
 import cards from '../minimal.json';
 import { computed, toRefs } from 'vue';
 const cardObj = keyBy(cards, 'identifier');
@@ -91,12 +88,12 @@ export default {
         return cardObj[k].stats.cost || 'other';
       });
 
-      return sortBy(
+      return orderBy(
         Object.entries(grouped).map(([key, v]) => ({ key, value: v.reduce(
           (acc, [,v]) => acc+v,
           0
         ) })),
-      'key')
+      'key', 'desc')
     });
 
     const maxCost = computed(() => {

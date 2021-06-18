@@ -1,6 +1,6 @@
 <template>
   <el-popover
-    :placement="placement"
+    placement="top"
     trigger="hover"
     :show-arrow="false"
     :show-after="800"
@@ -12,7 +12,7 @@
       <el-badge @mouseover="setShow" :value="count || 0" :class="`badge-${color}`">
         <el-button @click="$emit('add-clicked')" :class="`card-button ${color}`">
           <div class="button-content">
-            <div>
+            <div class="card-text">
               {{card.name}}
             </div>
             <div class="img-wrapper">
@@ -32,7 +32,6 @@ export default {
   props: {
     card: Object,
     count: Number,
-    placement: String,
   },
   emits: ['add-clicked'],
   setup() {
@@ -108,9 +107,13 @@ export default {
 } */
 .card-button {
   margin-bottom: .8rem !important;
-  width: 17rem;
+  width: 16rem;
   text-align: left !important;
   padding: .1rem !important;
   padding-left: .5rem !important;
+}
+.card-text {
+  white-space: normal;
+  max-width: 11.5rem;
 }
 </style>

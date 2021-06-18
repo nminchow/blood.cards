@@ -16,8 +16,8 @@
         <el-input placeholder="Deck Name" class="fill" v-model="name"></el-input>
       </el-col>
     </el-row>
-    <el-row type="flex" class="row-bg" justify="center" :gutter="10">
-      <el-col :xs="24" :sm="14">
+    <el-row type="flex" class="row-bg" justify="space-around" :gutter="10">
+      <el-col class="deck-container" :xs="24" :sm="13">
         <h2>Deck</h2>
         <div>
           <el-row type="flex" class="row-bg" justify="space-around">
@@ -32,23 +32,39 @@
               </div>
             </el-col>
           </el-row>
-          <ul class="cards">
-            <li v-for="card in Object.entries(this.deck.cards).map(([id, count]) => getCard(id))" :key="card.identifier" class="search-item">
-              <CardName
-                @add-clicked="add(card.identifier)"
-                :count="cards[card.identifier]"
-                :card="card"
-                placement="right"
-              />
-            </li>
-          </ul>
+          <el-row type="flex" class="row-bg" justify="space-around">
+            <el-col :sm="24" :lg="12">
+              <h3>Equipment ({{equipmentTotal}})</h3>
+              <ul class="cards">
+                <li v-for="card in equipment" :key="card.identifier">
+                  <CardName
+                    @add-clicked="add(card.identifier)"
+                    :count="cards[card.identifier]"
+                    :card="card"
+                  />
+                </li>
+              </ul>
+            </el-col>
+            <el-col :sm="24" :lg="12">
+              <h3>Deck ({{nonEquipmentTotal}})</h3>
+              <ul class="cards">
+                <li v-for="card in nonEquipment" :key="card.identifier">
+                  <CardName
+                    @add-clicked="add(card.identifier)"
+                    :count="cards[card.identifier]"
+                    :card="card"
+                  />
+                </li>
+              </ul>
+            </el-col>
+          </el-row>
         </div>
       </el-col>
-      <el-col :xs="24" :sm="8">
+      <el-col class="add-container" :xs="24" :sm="9" :gutter="4">
         <h2>Add Cards</h2>
         <el-input placeholder="Filter" v-model="optionFilter" class="input-with-select">
           <template #prepend>
-            <el-select style="width:8rem" v-model="optionTypeFilter" placeholder="Select">
+            <el-select style="width:8rem;" v-model="optionTypeFilter" placeholder="Select">
               <el-option
                 v-for="filter in Object.keys(cardFilters)"
                 :key="filter"
@@ -58,13 +74,12 @@
             </el-select>
           </template>
         </el-input>
-        <ul class="cards">
-          <li v-for="card in validCards" :key="card.identifier" class="search-item">
+        <ul class="grid cards">
+          <li v-for="card in validCards" :key="card.identifier" class="item search-item">
             <CardName
               @add-clicked="add(card.identifier)"
               :count="cards[card.identifier]"
               :card="card"
-              placement="left"
             />
           </li>
         </ul>
@@ -135,6 +150,46 @@ export default {
       };
     });
 
+    const equipmentKeywords = ['weapon', 'equipment'];
+
+    const getCard = (identifier) => {
+      return cardObj[identifier];
+    }
+
+    const add = (identifier) =>  {
+      const count = cards[identifier] || 0;
+      const max = getCard(identifier).keywords.find(isEquipmentKeyword) ? 1 : 3;
+      const setValue = () => {
+        if (count >= max) return 0;
+        return count + 1;
+      };
+      cards[identifier] = setValue();
+    }
+
+    const isEquipmentKeyword = (k) => equipmentKeywords.includes(k);
+
+    const equipment = computed(() => {
+      return Object.entries(cards).map(([id]) => getCard(id)).filter(
+        ({ keywords }) => keywords.find(isEquipmentKeyword)
+      )
+    });
+
+    const nonEquipment = computed(() => {
+      return Object.entries(cards).map(([id]) => getCard(id)).filter(
+        ({ keywords }) => !keywords.find(isEquipmentKeyword)
+      )
+    });
+
+    const cardPoolTotal = (identifiers) => {
+      return identifiers.reduce((v, identifier) => {
+        return v + cards[identifier];
+      }, 0);
+    };
+
+    const equipmentTotal = computed(() => cardPoolTotal(equipment.value.map(({ identifier }) => identifier)));
+
+    const nonEquipmentTotal = computed(() => cardPoolTotal(nonEquipment.value.map(({ identifier }) => identifier)));
+
     return {
       deck,
       cards,
@@ -146,6 +201,12 @@ export default {
       cardFilters,
       optionTypeFilter,
       purgeCards,
+      equipment,
+      nonEquipment,
+      getCard,
+      add,
+      equipmentTotal,
+      nonEquipmentTotal,
     }
   },
   beforeMount() {
@@ -157,7 +218,6 @@ export default {
     this.purgeCards = debounce(purgeCards, 5000);
   },
   computed: {
-    // this isn't firing when cards changes (because its an object). Proxy cards with a deep watcher? Switch to composition api?
     validCards: function() {
       // TODO optionFilter should probably be the output of debouncing an "option filter raw" to make input more smooth
       if( !this.hero ) return [];
@@ -182,7 +242,6 @@ export default {
     }
   },
   watch: {
-    // TODO: create debounced function that purges 0-d cards after some time (5 seconds or so)
     deck (data) {
       const query = {...this.$route.query, data: rison.encode(data)};
       this.$router.replace({ path: '/deck', query });
@@ -197,20 +256,8 @@ export default {
     if (cards) Object.entries(cards).map(([k, v]) => this.cards[k] = v);
     if (name) this.name = name;
     // this.deck = rison.decode(this.$route.params.data || '()');
-    // console.log(this.$route.params.data);
   },
   methods: {
-    add(identifier) {
-      const count = this.cards[identifier] || 0;
-      const setValue = () => {
-        if (count >= 3) return 0;
-        return count + 1;
-      };
-      this.cards[identifier] = setValue();
-    },
-    getCard(identifier) {
-      return cardObj[identifier];
-    }
   },
   components: {
     CardName,
@@ -225,7 +272,18 @@ export default {
 }
 .cards {
   list-style-type:none;
-  margin-left: 0;
-  padding-left: 0;
+}
+.cards.grid {
+  margin-top: 1rem;
+}
+.search-item {
+  margin: 0;
+  margin-left: .5rem;
+  margin-right: .5rem;
+}
+.deck-container {
+  border-width: 1px;
+  border-color: lightgray;
+  border-style: none solid none none;
 }
 </style>
