@@ -11,9 +11,12 @@
           </el-option>
         </el-select>
       </el-col>
-      <el-col :xs="24" :sm="12" :lg="8">
+      <el-col :xs="19" :sm="10" :lg="6">
         <!-- hacks to properly bind to input event for mobile -->
-        <el-input placeholder="Deck Name" class="fill" v-model="name"></el-input>
+        <el-input placeholder="Deck Name" v-model="name"></el-input>
+      </el-col>
+      <el-col :xs="5" :sm="3" :lg="2">
+        <el-button class="responsive-button" @click="save">Save</el-button>
       </el-col>
     </el-row>
     <el-row type="flex" class="row-bg" justify="space-around" :gutter="10">
@@ -93,6 +96,7 @@ import { reactive, ref, computed } from 'vue'
 import rison from 'rison';
 import { keyBy, chain, debounce } from 'lodash';
 import cards from '../minimal.json';
+import firebase from '../../firebase';
 import fuse from 'fuse.js'
 import CardName from './CardName.vue'
 import Curve from './Curve.vue'
@@ -190,6 +194,10 @@ export default {
 
     const nonEquipmentTotal = computed(() => cardPoolTotal(nonEquipment.value.map(({ identifier }) => identifier)));
 
+    const save = () => {
+      // do fiebase stuff
+    };
+
     return {
       deck,
       cards,
@@ -272,6 +280,7 @@ export default {
 }
 .cards {
   list-style-type:none;
+  padding-inline-start: 0px;
 }
 .cards.grid {
   margin-top: 1rem;
@@ -285,5 +294,9 @@ export default {
   border-width: 1px;
   border-color: lightgray;
   border-style: none solid none none;
+}
+.responsive-button {
+  width: 100%;
+  padding: 0px;
 }
 </style>

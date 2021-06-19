@@ -122,11 +122,13 @@ export default {
 </script>
 <style>
 .resource-label {
+  min-width: 43px;
   justify-content: right;
 }
 meter {
   margin-left: .5rem;
   margin-right: .5rem;
+  min-width: 0px;
 }
 .curve {
   flex: 1;
