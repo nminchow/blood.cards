@@ -46,6 +46,7 @@ a {
 .link {
   position: absolute;
   top: 1rem;
+  margin-bottom: .5rem;
 }
 .card {
   left: 2rem;
