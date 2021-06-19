@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "element-plus": "^1.0.2-beta.46",
+    "firebase": "9.0.0-beta.2",
     "fuse.js": "^6.4.6",
     "lodash": "^4.17.21",
     "rison": "^0.1.1",

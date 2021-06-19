@@ -96,7 +96,8 @@ import { reactive, ref, computed } from 'vue'
 import rison from 'rison';
 import { keyBy, chain, debounce } from 'lodash';
 import cards from '../minimal.json';
-import firebase from '../../firebase';
+import firebase from '../firebase';
+import { collection, addDoc } from "firebase/firestore";
 import fuse from 'fuse.js'
 import CardName from './CardName.vue'
 import Curve from './Curve.vue'
@@ -195,7 +196,12 @@ export default {
     const nonEquipmentTotal = computed(() => cardPoolTotal(nonEquipment.value.map(({ identifier }) => identifier)));
 
     const save = () => {
-      // do fiebase stuff
+      console.log(firebase.db);
+      addDoc(collection(firebase.db, "decks"), {
+        public: true,
+        owner: null,
+        deck: deck.value
+      });
     };
 
     return {
@@ -215,6 +221,7 @@ export default {
       add,
       equipmentTotal,
       nonEquipmentTotal,
+      save,
     }
   },
   beforeMount() {

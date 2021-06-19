@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "blood-cards"
+    "default": "blood-cards",
+    "dev": "blood-cards-dev"
   }
 }
