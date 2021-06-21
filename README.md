@@ -1,6 +1,10 @@
-# Contributing
+# [Blood.cards](https://blood.cards)
 
-## Requirments
+A _Flesh and Blood_ card browser and deck builder.
+
+## Contributing
+
+### Requirments
 
 [yarn](https://classic.yarnpkg.com/en/docs/install/#windows-stable)
 
@@ -13,7 +17,7 @@ Then, from this directory:
 nvm use
 ```
 
-## Backend
+### Backend
 
 (start this first, it doesn't handle ports as well)
 ```
