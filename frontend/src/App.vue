@@ -1,15 +1,17 @@
 <template>
   <span>
-    <el-row>
+    <el-row id="header-row">
       <el-col>
         <img class="top-logo" alt="Vue logo" src="./assets/blood.png" />
       </el-col>
       <el-col :xs="24">
-        <router-link class="card link" to="/">Card Browser</router-link>
         <div class= "subtext">A Flesh and Blood Card Browser</div>
       </el-col>
-      <el-col>
-        <router-link class="deck link" to="/deck">Deck Builder</router-link>
+      <el-col :xs="12">
+        <router-link  class="card link" to="/">Card Browser</router-link>
+      </el-col>
+      <el-col :xs="12">
+        <router-link :xs="12" class="deck link" to="/deck">Deck Builder</router-link>
       </el-col>
     </el-row>
     <router-view></router-view>
@@ -56,10 +58,13 @@ a {
 }
 @media only screen and (max-width: 680px){
   .link {
-    top: 6rem;
+    position: static;
   }
   .subtext {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
+  }
+  #header-row {
+    margin-bottom: 1rem;
   }
 }
 </style>
