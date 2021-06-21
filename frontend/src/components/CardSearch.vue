@@ -148,7 +148,6 @@ export default {
 
     const loadMore = () => {
       this.displayed += 15;
-      console.log('grabbing', this.displayed, this.displayed + 15);
       this.displayedResults.push(...this.results.slice(this.displayed, this.displayed + 15));
     }
 

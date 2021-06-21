@@ -10,7 +10,7 @@
     <CardImage :transition="false" :show="showImage" :url="card.image" />
     <template #reference>
       <el-badge @mouseover="setShow" :value="count || 0" :class="`badge-${color}`">
-        <el-button @click="$emit('add-clicked')" :class="`card-button ${color}`">
+        <el-button @click="clicked" :class="`card-button ${color}`">
           <div class="button-content">
             <div class="card-text">
               {{card.name}}
@@ -26,16 +26,27 @@
 </template>
 <script>
 import CardImage from './CardImage.vue'
+import { ElNotification } from "element-plus";
 
 
 export default {
   props: {
     card: Object,
     count: Number,
+    disabled: Boolean,
   },
   emits: ['add-clicked'],
-  setup() {
+  setup(props, context) {
+    const clicked = () => {
+      if (props.disabled) {
+        ElNotification.warning({ message: 'Click "Edit" to modify deck' });
+        return;
+      }
+      context.emit('add-clicked');
+    }
+
     return {
+      clicked,
       showImage: false,
     }
   },

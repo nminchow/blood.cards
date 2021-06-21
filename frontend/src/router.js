@@ -5,7 +5,7 @@ import DeckBuilder from './components/DeckBuilder.vue'
 
 const routes = [
   { path: '/', component: CardSearch },
-  { path: '/deck', component: DeckBuilder },
+  { path: '/deck/:id?', component: DeckBuilder },
 ]
 
 // 3. Create the router instance and pass the `routes` option

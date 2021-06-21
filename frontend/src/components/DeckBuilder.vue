@@ -2,7 +2,7 @@
   <span>
     <el-row type="flex" class="row-bg" justify="center" :gutter="10">
       <el-col :xs="24" :sm="6" :lg="4">
-        <el-select class="fill search" :filterable="true" v-model="hero" placeholder="Hero">
+        <el-select class="fill search" :disabled="shared" :filterable="true" v-model="hero" placeholder="Hero">
           <el-option
             v-for="item in heroOptions"
             :key="item.identifier"
@@ -13,10 +13,17 @@
       </el-col>
       <el-col :xs="19" :sm="10" :lg="6">
         <!-- hacks to properly bind to input event for mobile -->
-        <el-input placeholder="Deck Name" v-model="name"></el-input>
+        <el-input :disabled="shared" placeholder="Deck Name" v-model="name"></el-input>
       </el-col>
       <el-col :xs="5" :sm="3" :lg="2">
-        <el-button class="responsive-button" @click="save">Save</el-button>
+        <el-button class="responsive-button" @click="save">
+          <span v-if="shared">
+            Edit
+          </span>
+          <span v-else>
+            Share
+          </span>
+        </el-button>
       </el-col>
     </el-row>
     <el-row type="flex" class="row-bg" justify="space-around" :gutter="10">
@@ -41,6 +48,7 @@
               <ul class="cards">
                 <li v-for="card in equipment" :key="card.identifier">
                   <CardName
+                    :disabled="shared"
                     @add-clicked="add(card.identifier)"
                     :count="cards[card.identifier]"
                     :card="card"
@@ -53,6 +61,7 @@
               <ul class="cards">
                 <li v-for="card in nonEquipment" :key="card.identifier">
                   <CardName
+                    :disabled="shared"
                     @add-clicked="add(card.identifier)"
                     :count="cards[card.identifier]"
                     :card="card"
@@ -80,6 +89,7 @@
         <ul class="grid cards">
           <li v-for="card in validCards" :key="card.identifier" class="item search-item">
             <CardName
+              :disabled="shared"
               @add-clicked="add(card.identifier)"
               :count="cards[card.identifier]"
               :card="card"
@@ -93,11 +103,14 @@
 </template>
 <script>
 import { reactive, ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElNotification } from "element-plus";
 import rison from 'rison';
+import copy from 'copy-to-clipboard';
 import { keyBy, chain, debounce } from 'lodash';
 import cards from '../minimal.json';
 import firebase from '../firebase';
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDoc, doc } from "firebase/firestore";
 import fuse from 'fuse.js'
 import CardName from './CardName.vue'
 import Curve from './Curve.vue'
@@ -138,6 +151,7 @@ const cardFilters = {
 
 export default {
   setup() {
+    const router = useRouter()
     const cards = reactive({});
     const hero = ref();
     const name = ref('');
@@ -145,6 +159,7 @@ export default {
     const optionFilter = ref('');
     const optionTypeFilter = ref('All');
     const purgeCards = ref();
+    const shared = ref(false);
 
     const deck = computed(() => {
       return {
@@ -196,11 +211,19 @@ export default {
     const nonEquipmentTotal = computed(() => cardPoolTotal(nonEquipment.value.map(({ identifier }) => identifier)));
 
     const save = () => {
-      console.log(firebase.db);
+      if (shared.value) {
+        shared.value = false;
+        return;
+      }
       addDoc(collection(firebase.db, "decks"), {
         public: true,
         owner: null,
         deck: deck.value
+      }).then(({ id }) => {
+        shared.value = true;
+        router.replace({ path: `/deck/${id}`, query: '' });
+        ElNotification.success({ title: 'Shared!', message: 'Sharable URL created and copied to clipboard!' });
+        setTimeout(copy, 0, window.location);
       });
     };
 
@@ -222,6 +245,7 @@ export default {
       equipmentTotal,
       nonEquipmentTotal,
       save,
+      shared,
     }
   },
   beforeMount() {
@@ -258,18 +282,38 @@ export default {
   },
   watch: {
     deck (data) {
+      if (this.shared) return;
       const query = {...this.$route.query, data: rison.encode(data)};
       this.$router.replace({ path: '/deck', query });
       this.purgeCards();
     }
   },
   mounted() {
-    // todo: only do this if we have the param. If we have an ID, set from firestore
+    const decodeAndSet = ({ hero, cards, name }) => {
+      if (hero) this.hero = hero;
+      if (cards) Object.entries(cards).map(([k, v]) => this.cards[k] = v);
+      if (name) this.name = name;
+    }
+
     const urlSearchParams = new URLSearchParams(window.location.search);
-    const { hero, cards, name } = rison.decode(Object.fromEntries(urlSearchParams.entries()).data || '()');
-    if (hero) this.hero = hero;
-    if (cards) Object.entries(cards).map(([k, v]) => this.cards[k] = v);
-    if (name) this.name = name;
+    const { id } = this.$route.params;
+    if (id) {
+      this.shared = true;
+      const docRef = doc(firebase.db, "decks", id);
+      getDoc(docRef).then((snap) => {
+        if (!snap.exists()) {
+          this.$notify.error({ message: 'deck not found' });
+          this.shared = false;
+          return;
+        }; // TODO handle this
+        decodeAndSet(snap.data().deck);
+      })
+      return;
+    }
+    decodeAndSet(
+      rison.decode(Object.fromEntries(urlSearchParams.entries()).data || '()')
+    );
+
     // this.deck = rison.decode(this.$route.params.data || '()');
   },
   methods: {
