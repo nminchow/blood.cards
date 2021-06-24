@@ -1,7 +1,7 @@
 <template>
   <span>
     <el-row type="flex" class="row-bg" justify="center" :gutter="10">
-      <el-col :xs="24" :sm="12" :lg="8">
+      <el-col :xs="24" :sm="18" :xl="5">
         <!-- hacks to properly bind to input event for mobile -->
         <div class="el-input el-input--suffix search">
           <input
@@ -13,7 +13,17 @@
           />
         </div>
       </el-col>
-      <el-col :xs="24" :sm="6" :lg="4">
+      <el-col :xs="12" :sm="9" :xl="3">
+        <el-select class="fill search" :filterable="true" v-model="sets" multiple placeholder="Set">
+          <el-option
+            v-for="item in setOptions"
+            :key="item"
+            :label="item"
+            :value="item">
+          </el-option>
+        </el-select>
+      </el-col>
+      <el-col :xs="12" :sm="9" :xl="4">
         <el-select class="fill search" :filterable="true" v-model="keywords" multiple placeholder="Keyword">
           <el-option
             v-for="item in keywordOptions"
@@ -25,7 +35,7 @@
       </el-col>
     </el-row>
     <el-row type="flex" class="row-bg" justify="center" :gutter="10">
-      <el-col :xs="8" :sm="6" :lg="4">
+      <el-col :xs="8" :sm="6" :xl="4">
         <el-select class="fill search" :filterable="true" v-model="cost" multiple placeholder="Cost">
           <el-option
             v-for="item in costOptions"
@@ -35,7 +45,7 @@
           </el-option>
         </el-select>
       </el-col>
-      <el-col :xs="8" :sm="6" :lg="4">
+      <el-col :xs="8" :sm="6" :xl="4">
         <el-select class="fill search" :filterable="true" v-model="pitch" multiple placeholder="Pitch Value">
           <el-option
             v-for="item in [1, 2, 3]"
@@ -45,7 +55,7 @@
           </el-option>
         </el-select>
       </el-col>
-      <el-col :xs="8" :sm="6" :lg="4">
+      <el-col :xs="8" :sm="6" :xl="4">
         <el-select class="fill search" :filterable="true" v-model="defense" multiple placeholder="Defense">
           <el-option
             v-for="item in defenseOptions"
@@ -70,7 +80,7 @@ import { debounce, chain, throttle } from 'lodash';
 import fuse from 'fuse.js'
 
 const cardFuse = new fuse(cards, {
-  keys: ['name', 'identifier', 'keywords', 'stats.cost', 'stats.resource', 'stats.defense'],
+  keys: ['name', 'identifier', 'keywords', 'stats.cost', 'stats.resource', 'stats.defense', 'set'],
   threshold: 0.2,
   useExtendedSearch: true,
 });
@@ -78,6 +88,7 @@ const cardFuse = new fuse(cards, {
 const toUpperString = (x) => x.toString().toUpperCase();
 
 const keywordOptions = chain(cards).map('keywords').flatten().uniq().sortBy().value().filter(Boolean);
+const setOptions = chain(cards).map('set').uniq().sortBy().value().filter(Boolean);
 const costOptions = chain(cards).map('stats.cost').compact().map(toUpperString).uniq().value().sort();
 const defenseOptions = chain(cards).map('stats.defense').compact().map(toUpperString).uniq().value().sort();
 
@@ -85,10 +96,12 @@ export default {
   data() {
     return {
       search: '',
+      sets: [],
       keywords: [],
       pitch: [],
       cost: [],
       defense: [],
+      setOptions,
       keywordOptions,
       costOptions,
       defenseOptions,
@@ -104,7 +117,7 @@ export default {
   },
   beforeMount() {
     const getResults = () => {
-      const { search, keywords, cost, defense, pitch } = this;
+      const { search, keywords, cost, defense, pitch, sets } = this;
 
       const filters = keywords.length ? [{
         $or: keywords.map(keyword => ({ keywords: `=${keyword}`}))
@@ -129,6 +142,10 @@ export default {
         $or: defense.map(defense => ({ 'stats.defense': `=${defense}`}))
       }] : [];
 
+      const setMatch = sets.length ? [{
+        $or: sets.map(set => ({ 'set': `="${set}"`}))
+      }] : [];
+
 
       this.results = cardFuse.search({
         $and: [
@@ -137,6 +154,7 @@ export default {
           ...textMatch,
           ...pitchMatch,
           ...defenseMatch,
+          ...setMatch,
         ],
       });
 
@@ -170,6 +188,9 @@ export default {
     },
     defense() {
       this.searchFuse();
+    },
+    sets() {
+      this.searchFuse()
     }
   },
   methods: {

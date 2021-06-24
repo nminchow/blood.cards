@@ -305,7 +305,7 @@ export default {
           this.$notify.error({ message: 'deck not found' });
           this.shared = false;
           return;
-        }; // TODO handle this
+        };
         decodeAndSet(snap.data().deck);
       })
       return;

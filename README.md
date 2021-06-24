@@ -19,6 +19,8 @@ nvm use
 
 ### Backend
 
+The backend is used for deck storage and sharing, and isn't required if you're only working on card search. If you are working on deck-building functionality:
+
 (start this first, it doesn't handle ports as well)
 ```
 firebase emulators:start

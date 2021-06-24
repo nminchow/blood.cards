@@ -17,11 +17,11 @@ const getCards = async () => {
 };
 
 const saveFile = (cards) => {
-  const minimal = cards.map(({ identifier, name, keywords, rarity, banned, image, printings: [ { sku: { sku } } ], stats }) => {
+  const minimal = cards.map(({ identifier, name, keywords, rarity, banned, image, printings: [ { sku: { sku }, set } ], stats }) => {
     if (!stats.cost && keywords.some(k => k.includes(['action', 'instant']))) {
       stats.cost = 0;
     }
-    return { identifier, name, keywords, rarity, banned, image, sku, stats };
+    return { identifier, name, keywords, rarity, banned, image, sku, stats, set };
   });
   fs.writeFile('./minimal.json', JSON.stringify(minimal), () => console.log('done'));
   fs.writeFile('./output.json', JSON.stringify(cards), () => console.log('done'));
