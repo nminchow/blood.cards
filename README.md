@@ -17,17 +17,33 @@ Then, from this directory:
 nvm use
 ```
 
+### Frontend
+
+The frontend of this project is a [Vite](https://github.com/vitejs/vite) project which leans on [the element framework](https://github.com/element-plus/element-plus) for some basic style and component support (at the time of creation, it seemed to be the most robust vue3-compatible library. As support for vuetify becomes more robust, we may make the switch).
+
+To start the frontend dev server:
+
+```sh
+cd frontend
+yarn install
+yarn dev
+```
+
 ### Backend
 
-The backend is used for deck storage and sharing, and isn't required if you're only working on card search. If you are working on deck-building functionality:
+The backend is used for deck storage and sharing, and isn't required if you're only working on card search. But, if you _are_ working on deck-building functionality:
 
-(start this first, it doesn't handle ports as well)
+```sh
+cd frontend # I know, this is confusing
 ```
+
+Then, start the firebase emulators:
+```sh
 firebase emulators:start
 ```
 
-occasionally, killing the process will leave the port taken:
-```
+note: occasionally, killing the process will leave the port taken (at least on windows):
+```sh
 Get-Process -Id (Get-NetTCPConnection -LocalPort 8080).OwningProcess
 taskkill /PID (PIC from last step) /F
 ```
