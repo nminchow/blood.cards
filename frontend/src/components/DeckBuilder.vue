@@ -265,7 +265,9 @@ export default {
       const validKeywords = keywords.filter(k => !invalid.includes(k));
       const pool = cards.filter(({ keywords, banned }) => {
         if (banned) return false;
-        return !keywords.includes('hero') && keywords.find(k => [...validKeywords, 'generic'].includes(k));
+        if (keywords.includes('hero')) return false;
+        if (keywords.includes('generic')) return true;
+        return validKeywords.every(k => keywords.includes(k));
       }).filter(cardFilters[this.optionTypeFilter].filter);
 
       if (!this.optionFilter) return pool;
