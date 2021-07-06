@@ -1,7 +1,7 @@
 <template>
   <span>
     <el-row type="flex" class="row-bg" justify="center" :gutter="10">
-      <el-col :xs="24" :sm="18" :xl="5">
+      <el-col :xs="24" :sm="18" :xl="12">
         <!-- hacks to properly bind to input event for mobile -->
         <div class="el-input el-input--suffix search">
           <input
@@ -13,7 +13,9 @@
           />
         </div>
       </el-col>
-      <el-col :xs="12" :sm="9" :xl="3">
+    </el-row>
+    <el-row type="flex" class="row-bg" justify="center" :gutter="10">
+      <el-col :xs="9" :sm="7" :xl="5">
         <el-select class="fill search" :filterable="true" v-model="sets" multiple placeholder="Set">
           <el-option
             v-for="item in setOptions"
@@ -23,7 +25,17 @@
           </el-option>
         </el-select>
       </el-col>
-      <el-col :xs="12" :sm="9" :xl="4">
+      <el-col :xs="6" :sm="4" :xl="2">
+        <el-select class="fill search" :filterable="true" v-model="rarities" multiple placeholder="Rarity">
+          <el-option
+            v-for="item in rarityOptions"
+            :key="item"
+            :label="item"
+            :value="item">
+          </el-option>
+        </el-select>
+      </el-col>
+      <el-col :xs="9" :sm="7" :xl="5">
         <el-select class="fill search" :filterable="true" v-model="keywords" multiple placeholder="Keyword">
           <el-option
             v-for="item in keywordOptions"
@@ -80,7 +92,7 @@ import { debounce, chain, throttle } from 'lodash';
 import fuse from 'fuse.js'
 
 const cardFuse = new fuse(cards, {
-  keys: ['name', 'identifier', 'keywords', 'stats.cost', 'stats.resource', 'stats.defense', 'set'],
+  keys: ['name', 'identifier', 'keywords', 'stats.cost', 'stats.resource', 'stats.defense', 'set', 'rarity'],
   threshold: 0.2,
   useExtendedSearch: true,
 });
@@ -90,6 +102,7 @@ const toUpperString = (x) => x.toString().toUpperCase();
 const keywordOptions = chain(cards).map('keywords').flatten().uniq().sortBy().value().filter(Boolean);
 const setOptions = chain(cards).map('set').uniq().sortBy().value().filter(Boolean);
 const costOptions = chain(cards).map('stats.cost').compact().map(toUpperString).uniq().value().sort();
+const rarityOptions = chain(cards).map('rarity').compact().map(toUpperString).uniq().value().sort();
 const defenseOptions = chain(cards).map('stats.defense').compact().map(toUpperString).uniq().value().sort();
 
 export default {
@@ -100,10 +113,12 @@ export default {
       keywords: [],
       pitch: [],
       cost: [],
+      rarities: [],
       defense: [],
       setOptions,
       keywordOptions,
       costOptions,
+      rarityOptions,
       defenseOptions,
       displayed: 15,
       results: [],
@@ -117,7 +132,7 @@ export default {
   },
   beforeMount() {
     const getResults = () => {
-      const { search, keywords, cost, defense, pitch, sets } = this;
+      const { search, keywords, cost, defense, pitch, sets, rarities } = this;
 
       const filters = keywords.length ? [{
         $or: keywords.map(keyword => ({ keywords: `=${keyword}`}))
@@ -132,6 +147,10 @@ export default {
 
       const costMatch = cost.length ? [{
         $or: cost.map(cost => ({ 'stats.cost': `=${cost}`}))
+      }] : [];
+
+      const rarityMatch = rarities.length ? [{
+        $or: rarities.map(rarity => ({ 'rarity': `=${rarity}`}))
       }] : [];
 
       const pitchMatch = pitch.length ? [{
@@ -151,6 +170,7 @@ export default {
         $and: [
           ...filters,
           ...costMatch,
+          ...rarityMatch,
           ...textMatch,
           ...pitchMatch,
           ...defenseMatch,
@@ -190,7 +210,10 @@ export default {
       this.searchFuse();
     },
     sets() {
-      this.searchFuse()
+      this.searchFuse();
+    },
+    rarities() {
+      this.searchFuse();
     }
   },
   methods: {
