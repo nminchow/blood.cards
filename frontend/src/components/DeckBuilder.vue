@@ -262,12 +262,14 @@ export default {
       if( !this.hero ) return [];
       const { keywords } = cardObj[this.hero];
       const invalid = ['', 'hero', 'young']
-      const validKeywords = keywords.filter(k => !invalid.includes(k));
+      const heroKeywords = keywords.filter(k => !invalid.includes(k));
       const pool = cards.filter(({ keywords, banned }) => {
         if (banned) return false;
         if (keywords.includes('hero')) return false;
         if (keywords.includes('generic')) return true;
-        return validKeywords.every(k => keywords.includes(k));
+        const invalid = ['instant', 'defense', 'reaction', 'attack', 'aura', 'action'];
+        const cardKeywords = keywords.filter(k => !invalid.includes(k));
+        return cardKeywords.every(k => heroKeywords.includes(k));
       }).filter(cardFilters[this.optionTypeFilter].filter);
 
       if (!this.optionFilter) return pool;
