@@ -1,6 +1,6 @@
 <template>
   <el-popover
-    placement="top"
+    placement="left"
     trigger="hover"
     :show-arrow="false"
     :show-after="800"

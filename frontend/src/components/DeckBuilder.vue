@@ -58,16 +58,13 @@
             </el-col>
             <el-col :sm="24" :lg="12">
               <h3>Deck ({{nonEquipmentTotal}})</h3>
-              <ul class="cards">
-                <li v-for="card in nonEquipment" :key="card.identifier">
-                  <CardName
-                    :disabled="shared"
-                    @add-clicked="add(card.identifier)"
-                    :count="cards[card.identifier]"
-                    :card="card"
-                  />
-                </li>
-              </ul>
+              <DeckList
+                :disabled="shared"
+                :add-card="add"
+                :cards="nonEquipment"
+                :pool="cards"
+                @add-clicked="add"
+              />
             </el-col>
           </el-row>
         </div>
@@ -114,6 +111,7 @@ import { collection, addDoc, getDoc, doc } from "firebase/firestore";
 import fuse from 'fuse.js'
 import CardName from './CardName.vue'
 import Curve from './Curve.vue'
+import DeckList from './DeckList.vue'
 
 const cardObj = keyBy(cards, 'identifier');
 
@@ -191,13 +189,13 @@ export default {
     const equipment = computed(() => {
       return Object.entries(cards).map(([id]) => getCard(id)).filter(
         ({ keywords }) => keywords.find(isEquipmentKeyword)
-      )
+      );
     });
 
     const nonEquipment = computed(() => {
       return Object.entries(cards).map(([id]) => getCard(id)).filter(
         ({ keywords }) => !keywords.find(isEquipmentKeyword)
-      )
+      );
     });
 
     const cardPoolTotal = (identifiers) => {
@@ -261,14 +259,18 @@ export default {
       // TODO optionFilter should probably be the output of debouncing an "option filter raw" to make input more smooth
       if( !this.hero ) return [];
       const { keywords } = cardObj[this.hero];
-      const invalid = ['', 'hero', 'young']
-      const heroKeywords = keywords.filter(k => !invalid.includes(k));
+      const nonQualifying = ['', 'hero', 'young']
+      const heroKeywords = keywords.filter(k => !nonQualifying.includes(k));
       const pool = cards.filter(({ keywords, banned }) => {
         if (banned) return false;
         if (keywords.includes('hero')) return false;
         if (keywords.includes('generic')) return true;
-        const invalid = ['instant', 'defense', 'reaction', 'attack', 'aura', 'action'];
-        const cardKeywords = keywords.filter(k => !invalid.includes(k));
+        const nonQualifying = [
+          'instant', 'defense', 'reaction', 'attack', 'aura', 'action', 'equipment', 'weapon', 'arms', 'chest', 'legs', 'head', '1h', '2h',
+          'flail', 'dagger', 'hammer', 'sword', 'orb', 'axe', 'pistol', 'bow', 'staff', 'claw', 'gun', 'scepter', 'scythe', 'club',
+          'token', 'demon ally', '',
+        ];
+        const cardKeywords = keywords.filter(k => !nonQualifying.includes(k));
         return cardKeywords.every(k => heroKeywords.includes(k));
       }).filter(cardFilters[this.optionTypeFilter].filter);
 
@@ -324,7 +326,8 @@ export default {
   },
   components: {
     CardName,
-    Curve
+    Curve,
+    DeckList,
   }
 }
 </script>
