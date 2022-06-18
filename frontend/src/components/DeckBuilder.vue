@@ -268,7 +268,7 @@ export default {
         const nonQualifying = [
           'instant', 'defense', 'reaction', 'attack', 'aura', 'action', 'equipment', 'weapon', 'arms', 'chest', 'legs', 'head', '1h', '2h',
           'flail', 'dagger', 'hammer', 'sword', 'orb', 'axe', 'pistol', 'bow', 'staff', 'claw', 'gun', 'scepter', 'scythe', 'club',
-          'token', 'demon ally', '',
+          'token', 'demon ally', 'invocation', 'item', '',
         ];
         const cardKeywords = keywords.filter(k => !nonQualifying.includes(k));
         return cardKeywords.every(k => heroKeywords.includes(k));

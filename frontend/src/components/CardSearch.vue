@@ -135,7 +135,7 @@ export default {
       const { search, keywords, cost, defense, pitch, sets, rarities } = this;
 
       const filters = keywords.length ? [{
-        $or: keywords.map(keyword => ({ keywords: `=${keyword}`}))
+        $or: keywords.map(keyword => ({ keywords: `="${keyword}"`}))
       }] : [];
 
       const textMatch = search.length ? [{
